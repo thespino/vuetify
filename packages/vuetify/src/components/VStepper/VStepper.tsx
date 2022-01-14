@@ -5,6 +5,7 @@ import './VStepper.sass'
 import { VStepperStep } from './VStepperStep'
 import { VStepperContent } from './VStepperContent'
 import { VStepperLine } from './VStepperLine'
+import { VWindow } from '@/components/VWindow'
 
 // Composables
 import { makeGroupProps, useGroup } from '@/composables/group'
@@ -15,7 +16,7 @@ import { computed, provide, toRef } from 'vue'
 import { defineComponent } from '@/util'
 
 // Types
-import type { InjectionKey } from 'vue'
+import type { InjectionKey, PropType } from 'vue'
 import type { GroupProvide } from '@/composables/group'
 
 export const VStepperGroupProvideSymbol: InjectionKey<GroupProvide> = Symbol.for('vuetify:v-stepper-group')
@@ -33,8 +34,10 @@ export const VStepper = defineComponent({
       default: 'vertical',
       validator: (v: any) => ['vertical', 'horizontal'].includes(v),
     },
-    items: Array,
-    ...makeGroupProps(),
+    items: Array as PropType<any[]>,
+    ...makeGroupProps({
+      mandatory: 'force' as const,
+    }),
     ...makeTagProps(),
   },
 
@@ -43,7 +46,7 @@ export const VStepper = defineComponent({
   },
 
   setup (props, { slots, emit }) {
-    useGroup(props, VStepperGroupProvideSymbol)
+    const group = useGroup(props, VStepperGroupProvideSymbol)
 
     provide(VStepperProvideSymbol, {
       stackedLabels: toRef(props, 'stackedLabels'),
@@ -87,9 +90,11 @@ export const VStepper = defineComponent({
           </div>
 
           <div class="v-stepper__wrapper">
-            { props.items?.map((item, index) => (
-              <VStepperContent { ...item } step={ index + 1 } v-slots={ slots } />
-            )) }
+            <VWindow modelValue={ group.selected.value }>
+              { props.items?.map((item, index) => (
+                <VStepperContent { ...item } step={ index + 1 } v-slots={ slots } />
+              )) }
+            </VWindow>
           </div>
         </props.tag>
       )

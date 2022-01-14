@@ -39,6 +39,7 @@ export interface GroupProvide {
     disabled: boolean | undefined
   }[]>
   disabled: Ref<boolean | undefined>
+  findId: (value: unknown) => number | undefined
 }
 
 export interface GroupItemProvide {
@@ -275,6 +276,7 @@ export function useGroup (
     isSelected: (id: number) => selected.value.includes(id),
     selectedClass: computed(() => props.selectedClass),
     items: computed(() => items),
+    findId: (value: unknown) => items.find(item => item.value === value)?.id,
   }
 
   provide(injectKey, state)

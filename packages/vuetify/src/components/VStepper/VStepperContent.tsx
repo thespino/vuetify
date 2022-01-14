@@ -2,6 +2,7 @@
 import './VStepperContent.sass'
 
 // Components
+import { VWindowItem } from '@/components/VWindow'
 import { VExpandTransition } from '@/components/transitions'
 
 // Composables
@@ -31,33 +32,55 @@ export const VStepperContent = defineComponent({
 
     if (!group) throw new Error('foo')
 
-    const open = computed(() => {
-      const item = group.items.value[props.step - 1]
-      return !!item && group.selected.value.includes(item.id)
+    const groupItemId = computed(() => group.findId(props.value))
+    const isOpen = computed(() => {
+      const id = groupItemId.value
+      return id != null ? group.isSelected(id) : false
     })
-
-    const { hasContent, onAfterLeave } = useLazy(props, open)
+    const { hasContent, onAfterLeave } = useLazy(props, isOpen)
 
     const stepper = inject(VStepperProvideSymbol)
 
     if (!stepper) throw new Error('foo')
 
-    return () => (
-      <div
-        class={[
-          'v-stepper-content',
-          `v-stepper-content--${stepper.direction.value}`,
-        ]}
-      >
-        <VExpandTransition onAfterLeave={ onAfterLeave }>
+    return () => {
+      const content = slots[`content.${props.value}`]
+        ? slots[`content.${props.value}`]!(group)
+        : slots.content
+          ? slots.content(group)
+          : null
+
+      if (stepper.direction.value === 'vertical') {
+        return (
           <div
-            class="v-stepper-content__wrapper"
-            v-show={ open.value }
+            class={[
+              'v-stepper-content',
+              'v-stepper-content--vertical',
+            ]}
           >
-            { slots[`content.${props.value}`] && hasContent.value && slots[`content.${props.value}`]!(group) }
+            <VExpandTransition onAfterLeave={ onAfterLeave }>
+              <div
+                class="v-stepper-content__wrapper"
+                v-show={ isOpen.value }
+              >
+                { hasContent && content }
+              </div>
+            </VExpandTransition>
           </div>
-        </VExpandTransition>
-      </div>
-    )
+        )
+      }
+
+      return (
+        <VWindowItem
+          value={ groupItemId.value }
+          class={[
+            'v-stepper-content',
+            'v-stepper-content--horizontal',
+          ]}
+        >
+          { content }
+        </VWindowItem>
+      )
+    }
   },
 })
