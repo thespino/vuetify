@@ -29,19 +29,18 @@ export const VStepperContent = defineComponent({
 
   setup (props, { slots, emit }) {
     const group = inject(VStepperGroupProvideSymbol)
+    const stepper = inject(VStepperProvideSymbol)
 
     if (!group) throw new Error('foo')
+    if (!stepper) throw new Error('foo')
 
     const groupItemId = computed(() => group.findId(props.value))
     const isOpen = computed(() => {
       const id = groupItemId.value
       return id != null ? group.isSelected(id) : false
     })
+
     const { hasContent, onAfterLeave } = useLazy(props, isOpen)
-
-    const stepper = inject(VStepperProvideSymbol)
-
-    if (!stepper) throw new Error('foo')
 
     return () => {
       const content = slots[`content.${props.value}`]
@@ -71,14 +70,15 @@ export const VStepperContent = defineComponent({
       }
 
       return (
-        <VWindowItem
-          value={ groupItemId.value }
-          class={[
-            'v-stepper-content',
-            'v-stepper-content--horizontal',
-          ]}
-        >
-          { content }
+        <VWindowItem value={ groupItemId.value }>
+          <div
+            class={[
+              'v-stepper-content',
+              'v-stepper-content--horizontal',
+            ]}
+          >
+            { content }
+          </div>
         </VWindowItem>
       )
     }

@@ -81,7 +81,7 @@ export const VStepper = defineComponent({
           <div class="v-stepper__header">
             { props.items?.map((item, index) => (
               <>
-                <VStepperStep { ...item } step={ index + 1 } v-slots={ slots } last={ index === (props.items?.length ?? 0) - 1 } />
+                <VStepperStep { ...item } step={ index + 1 } v-slots={ slots } />
                 { index + 1 < Number(props.items?.length) && (
                   <VStepperLine />
                 ) }
